@@ -1,5 +1,7 @@
 # Recode work arrangement matrices from work_matrix_i_j_k to work_matrix_i_j
 # The value of work_matrix_i_j corresponds to the work location selected for the ith day of the week, jth period of the day
+# Day of the week: 1 - Sunday, ..., 7 - Saturday
+# Period of the day: 1 - 12AM-6AM, then 2-hour periods (2 - 6AM-8AM, ..., 10 - 10PM-12AM)
 # Working at multiple locations leads to a value of work_matrix_i_j = 7, 6, 5, or 3 according to the combination of locations
 # 7 - Primary + Temporary + Home
 # 6 - Primary + Temporary

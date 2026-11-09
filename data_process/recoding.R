@@ -1,4 +1,4 @@
-recoding = function(data) {
+recoding <- function(data) {
   data <- data %>%
     mutate(
       age = 2024 - as.numeric(yearborn),

@@ -67,17 +67,25 @@ clustering = function(data, n_clusters) {
     )
   )
 
+  km_centers = km$centers %>%
+    bind_cols(
+      forward_mapper %>%
+        select(row_index)
+    ) %>%
+    arrange(row_index) %>%
+    select(-row_index)
+
+  assign(
+    "km_centers",
+    km_centers,
+    envir = .GlobalEnv
+  )
+
   print(
     "clustering centers:",
   )
   print(
-    km$centers %>%
-      bind_cols(
-        forward_mapper %>%
-          select(row_index)
-      ) %>%
-      arrange(row_index) %>%
-      select(-row_index)
+    km_centers
   )
 
   print(

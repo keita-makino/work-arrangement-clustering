@@ -1,7 +1,12 @@
-create_database = function(data) {
+create_database <- function(data) {
   data <- data %>%
     select(
       row_index,
+      visited_total_1,
+      visited_total_2,
+      visited_total_3,
+      vmt_commute,
+      starts_with("hours_place_"),
       age,
       gender,
       income,

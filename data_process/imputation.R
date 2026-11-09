@@ -9,7 +9,7 @@ imputation = function(data) {
     )
 
   imputed <- mice::mice(
-    data,
+    data %>% select(-vmt_commute),
     m = 1,
     maxit = 50,
     method = "polr",
