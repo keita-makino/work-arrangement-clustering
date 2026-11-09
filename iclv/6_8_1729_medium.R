@@ -25,11 +25,11 @@ apollo_control <- list(
   nCores = 2
 )
 
-n_clusters = 6
-n_factors = 8
-n_sample = 1729
+n_clusters <- 6
+n_factors <- 8
+n_sample <- 1729
 
-iv_list = list(
+iv_list <- list(
   "age_18_34" = 1,
   "age_55plus" = 3,
   "gender_women" = 1,
@@ -53,17 +53,17 @@ iv_list = list(
   "flx_sv" = 0
 )
 
-ivs_excluded = c(
+ivs_excluded <- c(
   "jobtype"
 )
 
-factor_attitude_connection = get_factor_attitude_connection(
+factor_attitude_connection <- get_factor_attitude_connection(
   n_factors,
   n_sample
 ) %>%
   slice(c(-9, -19, -20, -27))
 
-variables = c(
+variables <- c(
   paste(
     "asc",
     2:n_clusters,
@@ -126,7 +126,7 @@ apollo_beta[
       .,
       "^[d|s]_"
     )
-] = 1
+] <- 1
 
 apollo_fixed <- c()
 
@@ -602,58 +602,63 @@ output_df %>%
 #   file = file.path("output", "iclv", paste0(model_name, ".csv")),
 # )
 
-cfa_result = rbind(
-  get_apollo_prediction(-1),
+cfa_result <- rbind(
   get_apollo_prediction(0),
-  get_apollo_prediction(1),
-  get_apollo_prediction(-1, c(0, 0)),
+  get_apollo_prediction(-1),
+  get_apollo_prediction(-2),
   get_apollo_prediction(0, c(0, 0)),
-  get_apollo_prediction(1, c(0, 0)),
-  get_apollo_prediction(-1, c(0.1, 0.5)),
+  get_apollo_prediction(-1, c(0, 0)),
+  get_apollo_prediction(-2, c(0, 0)),
   get_apollo_prediction(0, c(0.1, 0.5)),
-  get_apollo_prediction(1, c(0.1, 0.5)),
-  get_apollo_prediction(-1, c(1.5, 1.5)),
+  get_apollo_prediction(-1, c(0.1, 0.5)),
+  get_apollo_prediction(-2, c(0.1, 0.5)),
   get_apollo_prediction(0, c(1.5, 1.5)),
-  get_apollo_prediction(1, c(1.5, 1.5)),
-  get_apollo_prediction(-1, c(3.5, 3.5)),
+  get_apollo_prediction(-1, c(1.5, 1.5)),
+  get_apollo_prediction(-2, c(1.5, 1.5)),
   get_apollo_prediction(0, c(3.5, 3.5)),
-  get_apollo_prediction(1, c(3.5, 3.5)),
-  get_apollo_prediction(-1, c(5.5, 5.5)),
+  get_apollo_prediction(-1, c(3.5, 3.5)),
+  get_apollo_prediction(-2, c(3.5, 3.5)),
   get_apollo_prediction(0, c(5.5, 5.5)),
-  get_apollo_prediction(1, c(5.5, 5.5))
-) %>%
+  get_apollo_prediction(-1, c(5.5, 5.5)),
+  get_apollo_prediction(-2, c(5.5, 5.5)),
+  get_apollo_prediction(0, c(3.5, 5.5)),
+  get_apollo_prediction(-1, c(3.5, 3.5)),
+  get_apollo_prediction(-2, c(3.5, 3.5))
+)
+
+cfa_result_formatted <- cfa_result %>%
   mutate(
     max_days = c(
-      rep("All\nn=1729", 3),
-      rep("0\nn=533", 3),
-      rep("0.1 or 0.5\nn=199", 3),
-      rep("1.5\nn=263", 3),
-      rep("3.5\nn=240", 3),
-      rep("5.5\nn=494", 3)
+      rep("All workers\nn=1729", 3),
+      rep("Never\nn=533", 3),
+      rep("3 days or fewer per month \nn=199", 3),
+      rep("1-2 days per week\nn=263", 3),
+      rep("3-4 days per week\nn=240", 3),
+      rep("5 or more days per week\nn=494", 3)
     ),
     max_days = factor(
       max_days,
       levels = c(
-        "All\nn=1729",
-        "0\nn=533",
-        "0.1 or 0.5\nn=199",
-        "1.5\nn=263",
-        "3.5\nn=240",
-        "5.5\nn=494"
+        "All workers\nn=1729",
+        "Never\nn=533",
+        "3 days or fewer per month \nn=199",
+        "1-2 days per week\nn=263",
+        "3-4 days per week\nn=240",
+        "5 or more days per week\nn=494"
       )
     ),
     change_in_permission = rep(
       c(
-        "Minus-one scenario",
-        "Base scenario",
-        "Plus-one scenario"
+        "Current",
+        "Permission reduced\nby 1 day",
+        "Permission reduced\nby 2 days"
       ), 6
     ) %>%
       factor(
         levels = c(
-          "Minus-one scenario",
-          "Base scenario",
-          "Plus-one scenario"
+          "Permission reduced\nby 2 days",
+          "Permission reduced\nby 1 day",
+          "Current"
         )
       ),
   ) %>%
@@ -692,9 +697,9 @@ cfa_result = rbind(
   mutate(
     share = case_when(
       max_days == "0\nn=533" &
-        change_in_permission == "Minus-one scenario" ~ "---",
-      max_days == "5.5\nn=494" &
-        change_in_permission == "Plus-one scenario" ~ "---",
+        change_in_permission != "Current" ~ "---",
+      max_days == "0.1 or 0.5\nn=199" &
+        change_in_permission == "Permission reduced\nby 2 days" ~ "---",
       T ~ formatC(
         share * 100,
         format = "f",
@@ -704,21 +709,25 @@ cfa_result = rbind(
     )
   )
 
-
-
-main = cfa_result %>%
+all <- cfa_result_formatted %>%
+  filter(str_detect(
+    max_days,
+    "All"
+  )) %>%
   ggplot() +
   geom_tile(
     aes(
       x = cluster,
       y = change_in_permission,
-      fill = share %>% str_replace(
-        .,
-        "%",
-        ""
-      ) %>%
-        as.numeric()
-    )
+      # fill = share %>% str_replace(
+      #   .,
+      #   "%",
+      #   ""
+      # ) %>%
+      #   as.numeric()
+    ),
+    fill = "#FFFFFF",
+    color = "#bbbbbb"
   ) +
   geom_text(
     aes(
@@ -726,7 +735,7 @@ main = cfa_result %>%
       y = change_in_permission,
       label = share
     ),
-    color = "#FFFFFF",
+    color = "#111111",
     size = 3
   ) +
   facet_wrap(
@@ -740,10 +749,75 @@ main = cfa_result %>%
     strip.placement = "outside"
   ) +
   xlab(
-    "Cluster type"
+    "Work arrangement typology"
   ) +
   ylab(
-    "Policy-change scenario"
+    "Employers' remote work policy scenario"
+  )
+
+ggsave(
+  all,
+  filename = file.path(
+    "dist",
+    "descriptive",
+    paste0(model_name, "_tile_all.png")
+  ),
+  width = 10,
+  height = 3
+)
+
+other <- cfa_result_formatted %>%
+  filter(!str_detect(
+    max_days,
+    "All"
+  )) %>%
+  filter(!str_detect(
+    max_days,
+    "Never"
+  )) %>%
+  filter(!str_detect(
+    max_days,
+    "month"
+  )) %>%
+  ggplot() +
+  geom_tile(
+    aes(
+      x = cluster,
+      y = change_in_permission
+      # fill = share %>% str_replace(
+      #   .,
+      #   "%",
+      #   ""
+      # ) %>%
+      #   as.numeric()
+    ),
+    fill = "#FFFFFF",
+    color = "#bbbbbb"
+  ) +
+  geom_text(
+    aes(
+      x = cluster,
+      y = change_in_permission,
+      label = share
+    ),
+    color = "#111111",
+    size = 3
+  ) +
+  facet_wrap(
+    vars(max_days),
+    ncol = 1,
+    strip.position = "right"
+  ) +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    strip.placement = "outside"
+  ) +
+  xlab(
+    "Work arrangement typology"
+  ) +
+  ylab(
+    "Employers' remote work policy scenario"
   )
 
 title <- ggplot() +
@@ -751,14 +825,14 @@ title <- ggplot() +
     "text",
     x = 0.5,
     y = 0.5,
-    label = "Current level of permission (days per week)",
+    label = "Current level of permission",
     angle = -90
   ) +
   coord_fixed(clip = "off") +
   theme_void()
 
-plot_grid(
-  main,
+cow <- cowplot::plot_grid(
+  other,
   title,
   nrow = 1,
   rel_widths = c(1, .04)
@@ -768,11 +842,12 @@ plot_grid(
   )
 
 ggsave(
+  cow,
   filename = file.path(
     "dist",
     "descriptive",
     paste0(model_name, "_tile.png")
   ),
   width = 10,
-  height = 10
+  height = 7
 )

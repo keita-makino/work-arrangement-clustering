@@ -13,6 +13,25 @@ database <- readRDS(
   )
 )
 
+database %>%
+  pivot_longer(
+    cols = starts_with("hours_place_"),
+    names_to = c("place", "day"),
+    names_pattern = "hours_place_(\\d)_day_(\\d)",
+    values_to = "hours"
+  ) %>%
+  group_by(row_index, day) %>%
+  summarise(
+    total_hours = sum(hours),
+    place_1 = hours[place == "1"] > 0,
+    place_2 = hours[place == "2"] > 0,
+    .groups = "drop"
+  ) %>%
+  filter(total_hours > 0) %>%
+  summarise(share_place1_and_2 = mean(place_1 & place_2))
+
+
+
 source("./factor_regression.R")
 
 apollo_initialise()
@@ -25,11 +44,11 @@ apollo_control <- list(
   nCores = 8
 )
 
-n_clusters = 6
-n_factors = 8
-n_sample = 1729
+n_clusters <- 6
+n_factors <- 8
+n_sample <- 1729
 
-iv_list = list(
+iv_list <- list(
   "age_18_34" = 1,
   "age_55plus" = 3,
   "gender_women" = 1,
@@ -53,17 +72,17 @@ iv_list = list(
   "flx_sv" = 0
 )
 
-ivs_excluded = c(
+ivs_excluded <- c(
   "jobtype"
 )
 
-factor_attitude_connection = get_factor_attitude_connection(
+factor_attitude_connection <- get_factor_attitude_connection(
   n_factors,
   n_sample
 ) %>%
   slice(c(-9, -19, -20, -27))
 
-variables = c(
+variables <- c(
   paste(
     "asc",
     2:n_clusters,
@@ -126,7 +145,7 @@ apollo_beta[
       .,
       "^[d|s]_"
     )
-] = 1
+] <- 1
 
 apollo_fixed <- c()
 
