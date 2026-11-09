@@ -1,2 +1,5 @@
 dist
 data
+doc
+.env
+*.stackdump
