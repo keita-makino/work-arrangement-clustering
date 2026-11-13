@@ -19,15 +19,15 @@ get_stats = function(model_name) {
   )
 }
 
-get_stats("6_8_1729_medium_mnl") %>%
+get_stats("6_8_1729_medium_mnl_occ") %>%
   full_join(
-    get_stats("6_8_1729_medium_nostr"),
+    get_stats("6_8_1729_medium_nostr_occ"),
     by = "name"
   ) %>%
   full_join(
-    get_stats("6_8_1729_medium"),
+    get_stats("6_8_1729_medium_occ"),
     by = "name"
   ) %>%
   write_csv(
-    file.path("dist", "iclv", "6_8_1729_stats.csv")
+    file.path("dist", "iclv", "6_8_1729_occ_stats.csv")
   )

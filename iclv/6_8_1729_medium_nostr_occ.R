@@ -5,7 +5,7 @@ source(file.path("iclv", "get_apollo_prediction.R"))
 
 # Companion of 6_8_1729_medium_occ.R without explanatory variables in the
 # structural sub-model (the latent variables are standard normal). It is the
-# paper's 6_8_1729_medium_nostr.R with the six occupation dummies added to the
+# earlier 6_8_1729_medium_nostr.R with the six occupation dummies added to the
 # five cluster utilities, so that model is this one with those 30 parameters
 # fixed at 0.
 
@@ -13,7 +13,7 @@ model_name <- "6_8_1729_medium_nostr_occ"
 
 # "none" skips the Hessian (no standard errors, about 15-20 minutes). Use
 # "analytic" (the Apollo default, which falls back to numerical derivatives) to
-# get standard errors; the paper model needed about 8 hours for that step.
+# get standard errors; the earlier main model needed about 8 hours for that step.
 hessian_routine <- "analytic"
 
 database <- readRDS(
@@ -113,8 +113,10 @@ apollo_beta[
     )
 ] <- 1
 
-# Start from the estimates of the paper's no-structural model. The 30 new occupation parameters
-# start at 0, so LL(start) should equal the final LL of that model.
+# Start from the estimates of the earlier no-structural model. The 30 new
+# occupation parameters start at 0, so LL(start) is close to the final LL of
+# that model (not equal: the earlier models were estimated in May 2025 on
+# slightly different imputed income values).
 model_base <- apollo_loadModel(
   file.path("dist", "iclv", "6_8_1729_medium_nostr")
 )

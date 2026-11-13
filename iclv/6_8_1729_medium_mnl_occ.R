@@ -3,7 +3,7 @@ source(file.path("iclv", "find_fixed_beta.R"))
 source(file.path("iclv", "get_apollo_prediction.R"))
 
 # Companion of 6_8_1729_medium_occ.R without latent variables: a multinomial
-# logit of cluster membership. It is the paper's 6_8_1729_medium_mnl.R with the
+# logit of cluster membership. It is the earlier 6_8_1729_medium_mnl.R with the
 # six occupation dummies added to the five cluster utilities, so that model is
 # this one with those 30 parameters fixed at 0.
 
@@ -77,8 +77,10 @@ apollo_beta <- setNames(
   rep(0, length(variables)), variables
 )
 
-# Start from the estimates of the paper's MNL. The 30 new occupation parameters
-# start at 0, so LL(start) should equal the final LL of that model.
+# Start from the estimates of the earlier MNL. The 30 new occupation parameters
+# start at 0, so LL(start) is close to the final LL of that model (not equal:
+# the earlier models were estimated in May 2025 on slightly different imputed
+# income values).
 model_base <- apollo_loadModel(
   file.path("dist", "iclv", "6_8_1729_medium_mnl")
 )

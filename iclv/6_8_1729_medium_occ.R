@@ -4,16 +4,18 @@ source(file.path("iclv", "get_factor_variable_connection.R"))
 source(file.path("iclv", "find_fixed_beta.R"))
 source(file.path("iclv", "get_apollo_prediction.R"))
 
-# Robustness check of the paper model (6_8_1729_medium.R): occupation also
-# enters the utilities of the choice sub-model (6 dummies x 5 clusters = 30 new
-# parameters). The structural and measurement equations are unchanged, so the
-# paper model is this model with the 30 parameters fixed at 0.
+# Main ICLV model of the paper (since November 2026). It is the earlier main
+# model, 6_8_1729_medium.R, with occupation also entering the utilities of the
+# choice sub-model (6 dummies x 5 clusters = 30 new parameters). The structural
+# and measurement equations are unchanged, so the earlier model is this model
+# with the 30 parameters fixed at 0.
 
 model_name <- "6_8_1729_medium_occ"
 
 # "none" skips the Hessian (no standard errors, about 15-20 minutes). Use
 # "analytic" (the Apollo default, which falls back to numerical derivatives) to
-# get standard errors; the paper model needed about 8 hours for that step.
+# get standard errors; this model needed about 3.6 hours for that step on a
+# 20-core machine.
 hessian_routine <- "analytic"
 
 database <- readRDS(
@@ -125,8 +127,10 @@ apollo_beta[
     )
 ] <- 1
 
-# Start from the estimates of the paper model. The 30 new occupation parameters
-# start at 0, so LL(start) should equal the final LL of the paper model.
+# Start from the estimates of the earlier main model. The 30 new occupation
+# parameters start at 0, so LL(start) is close to the final LL of that model
+# (not equal: the earlier models were estimated in May 2025 on slightly
+# different imputed income values).
 model_base <- apollo_loadModel(
   file.path("dist", "iclv", "6_8_1729_medium")
 )
